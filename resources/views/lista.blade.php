@@ -16,11 +16,11 @@
     @keyframes riseIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;} }
     .cb-card-media{
       position:relative; height:210px; margin:-1px -1px 0; overflow:hidden;
-      background:var(--color-neutral-100);
+      background:#fff;
       display:flex; align-items:center; justify-content:center;
       filter:sepia(0.22) saturate(0.82) contrast(1.05);
     }
-    .cb-card-media img{ width:100%; height:100%; object-fit:cover; }
+    .cb-card-media img{ width:100%; height:100%; object-fit:contain; padding:14px; box-sizing:border-box; }
     .cb-card-media .cb-placeholder{ color:var(--color-accent-300); opacity:.55; }
     .cb-hidden{ display:none !important; }
     /* flash toast */
