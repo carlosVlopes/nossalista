@@ -124,7 +124,13 @@
         <div class="card cb-card" data-cat="{{ $product->categoria }}" data-reserved="{{ $isReservado ? '1' : '0' }}" style="display:flex; flex-direction:column; overflow:hidden; padding:0; @if($isReservado) opacity:.62; @endif">
           <div class="cb-card-media">
             @if ($product->imagemUrl())
-              <img src="{{ $product->imagemUrl() }}" alt="{{ $product->nome }}">
+              @if ($product->link)
+                <a href="{{ $product->link }}" target="_blank" rel="noopener" style="display:block; width:100%; height:100%;" title="Ver {{ $product->nome }}">
+                  <img src="{{ $product->imagemUrl() }}" alt="{{ $product->nome }}">
+                </a>
+              @else
+                <img src="{{ $product->imagemUrl() }}" alt="{{ $product->nome }}">
+              @endif
             @else
               <svg class="cb-placeholder" width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 20s-7-4.5-9.3-9C1 7.5 3 4.5 6.2 4.5 8.3 4.5 10 6 12 8c2-2 3.7-3.5 5.8-3.5 3.2 0 5.2 3 3.5 6.5C19 15.5 12 20 12 20z"/></svg>
             @endif
