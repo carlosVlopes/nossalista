@@ -73,7 +73,7 @@
     <div class="cb-hero-frame-b" style="position:absolute; inset:29px; border:1px solid var(--color-divider); pointer-events:none;"></div>
     <div class="cb-hero-grid" style="position:relative; max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1.05fr .95fr; align-items:center; gap:56px; animation:riseIn .9s ease both;">
       <div class="cb-hero-text" style="text-align:left;">
-        <div style="font-family:var(--font-heading); letter-spacing:.34em; text-transform:uppercase; font-size:13px; color:var(--color-accent-700); font-feature-settings:'tnum'; margin-bottom:24px;">Nossa Casaa Novaa &nbsp;·&nbsp; Lista de Presentes</div>
+        <div style="font-family:var(--font-heading); letter-spacing:.34em; text-transform:uppercase; font-size:13px; color:var(--color-accent-700); font-feature-settings:'tnum'; margin-bottom:24px;">Nossaa Casaa Novaa &nbsp;·&nbsp; Lista de Presentes</div>
         <h1 style="font-family:var(--font-heading); font-weight:400; font-size:clamp(48px,7vw,92px); line-height:1.02; margin:0; letter-spacing:.01em;">Carlos<span style="font-style:italic; color:var(--color-accent); display:inline-block; margin:0 .22em;">&amp;</span>Bia</h1>
         <div style="display:flex; align-items:center; gap:16px; margin:26px 0 0; max-width:360px;">
           <span style="flex:1; height:1px; background:var(--color-accent); opacity:.5;"></span>
