@@ -104,7 +104,7 @@
     </div>
 
     @if ($products->isEmpty())
-      <p class="text-muted" style="font-size:17px;">A lista está sendo preparada com carinho. Volte em breve. 💛</p>
+      <p class="text-muted" style="font-size:17px;">A lista está sendo preparada com carinho. Volte em breve.</p>
     @else
     <div id="cb-chips" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
       @php $chipBase = "font-family:var(--font-heading); font-size:16px; letter-spacing:.03em; padding:9px 18px; border-radius:var(--radius-sm); cursor:pointer; background:transparent; transition:all .18s ease;"; @endphp
