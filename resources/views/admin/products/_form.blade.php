@@ -16,14 +16,23 @@
     <input class="input" type="text" id="nome" name="nome" value="{{ old('nome', $product->nome) }}" required>
   </div>
 
+  @php
+    $categorias = \App\Models\Product::query()->select('categoria')->distinct()->orderBy('categoria')->pluck('categoria');
+    $categoriaAtual = old('categoria', $product->categoria);
+    $categoriaNova = filled($categoriaAtual) && ! $categorias->contains($categoriaAtual);
+  @endphp
   <div class="field">
     <label for="categoria">Categoria *</label>
-    <input class="input" type="text" id="categoria" name="categoria" value="{{ old('categoria', $product->categoria) }}" list="categorias-existentes" required>
-    <datalist id="categorias-existentes">
-      @foreach (\App\Models\Product::query()->select('categoria')->distinct()->pluck('categoria') as $cat)
-        <option value="{{ $cat }}"></option>
+    <select class="input" id="categoria" name="{{ $categoriaNova ? '' : 'categoria' }}" required onchange="toggleNovaCategoria(this)">
+      <option value="" disabled @selected(blank($categoriaAtual))>Selecione...</option>
+      @foreach ($categorias as $cat)
+        <option value="{{ $cat }}" @selected(! $categoriaNova && $categoriaAtual === $cat)>{{ $cat }}</option>
       @endforeach
-    </datalist>
+      <option value="__nova__" @selected($categoriaNova)>+ Nova categoria</option>
+    </select>
+    <input class="input" type="text" id="categoria-nova" name="{{ $categoriaNova ? 'categoria' : '' }}"
+           value="{{ $categoriaNova ? $categoriaAtual : '' }}" placeholder="Nome da nova categoria"
+           style="margin-top:8px; display:{{ $categoriaNova ? 'block' : 'none' }};" @required($categoriaNova)>
   </div>
 </div>
 
@@ -65,3 +74,17 @@
   <button type="submit" class="btn btn-primary">{{ $product->exists ? 'Salvar alterações' : 'Criar produto' }}</button>
   <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Cancelar</a>
 </div>
+
+<script>
+  function toggleNovaCategoria(select) {
+    var novaInput = document.getElementById('categoria-nova');
+    var isNova = select.value === '__nova__';
+    novaInput.style.display = isNova ? 'block' : 'none';
+    novaInput.required = isNova;
+    novaInput.name = isNova ? 'categoria' : '';
+    select.name = isNova ? '' : 'categoria';
+    if (isNova) {
+      novaInput.focus();
+    }
+  }
+</script>

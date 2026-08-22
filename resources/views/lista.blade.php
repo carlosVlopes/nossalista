@@ -73,7 +73,7 @@
     <div class="cb-hero-frame-b" style="position:absolute; inset:29px; border:1px solid var(--color-divider); pointer-events:none;"></div>
     <div class="cb-hero-grid" style="position:relative; max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1.05fr .95fr; align-items:center; gap:56px; animation:riseIn .9s ease both;">
       <div class="cb-hero-text" style="text-align:left;">
-        <div style="font-family:var(--font-heading); letter-spacing:.34em; text-transform:uppercase; font-size:13px; color:var(--color-accent-700); font-feature-settings:'tnum'; margin-bottom:24px;">Nossaa Casaa Novaa &nbsp;·&nbsp; Lista de Presentes</div>
+        <div style="font-family:var(--font-heading); letter-spacing:.34em; text-transform:uppercase; font-size:13px; color:var(--color-accent-700); font-feature-settings:'tnum'; margin-bottom:24px;">Nossa Casa Nova &nbsp;·&nbsp; Lista de Presentes</div>
         <h1 style="font-family:var(--font-heading); font-weight:400; font-size:clamp(48px,7vw,92px); line-height:1.02; margin:0; letter-spacing:.01em;">Carlos<span style="font-style:italic; color:var(--color-accent); display:inline-block; margin:0 .22em;">&amp;</span>Bia</h1>
         <div style="display:flex; align-items:center; gap:16px; margin:26px 0 0; max-width:360px;">
           <span style="flex:1; height:1px; background:var(--color-accent); opacity:.5;"></span>
@@ -106,6 +106,11 @@
     @if ($products->isEmpty())
       <p class="text-muted" style="font-size:17px;">A lista está sendo preparada com carinho. Volte em breve.</p>
     @else
+    <div style="margin-bottom:18px;">
+      <input id="cb-search" type="search" placeholder="Pesquisar presente…" autocomplete="off"
+        style="width:100%; max-width:420px; box-sizing:border-box; font-family:var(--font-body); font-size:16px; padding:12px 16px; border:1px solid var(--color-divider); border-radius:var(--radius-sm); background:var(--color-bg); color:var(--color-text);">
+    </div>
+
     <div id="cb-chips" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
       @php $chipBase = "font-family:var(--font-heading); font-size:16px; letter-spacing:.03em; padding:9px 18px; border-radius:var(--radius-sm); cursor:pointer; background:transparent; transition:all .18s ease;"; @endphp
       @foreach (collect(['Todos'])->merge($categorias) as $cat)
@@ -121,7 +126,7 @@
     <div class="cb-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:28px; padding-bottom:16px;">
       @foreach ($products as $product)
         @php $isReservado = $product->status === \App\Enums\ProductStatus::Reservado; @endphp
-        <div class="card cb-card" data-cat="{{ $product->categoria }}" data-reserved="{{ $isReservado ? '1' : '0' }}" style="display:flex; flex-direction:column; overflow:hidden; padding:0; @if($isReservado) opacity:.62; @endif">
+        <div class="card cb-card" data-cat="{{ $product->categoria }}" data-reserved="{{ $isReservado ? '1' : '0' }}" data-search="{{ \Illuminate\Support\Str::lower($product->nome.' '.$product->categoria.' '.$product->descricao) }}" style="display:flex; flex-direction:column; overflow:hidden; padding:0; @if($isReservado) opacity:.62; @endif">
           <div class="cb-card-media">
             @if ($product->imagemUrl())
               @if ($product->link)
@@ -247,6 +252,7 @@
   var chips = Array.from(document.querySelectorAll('.cb-chip'));
   var cards = Array.from(document.querySelectorAll('.cb-card'));
   var hideInput = document.getElementById('cb-hide-reserved');
+  var searchInput = document.getElementById('cb-search');
   var active = 'Todos';
 
   var chipBase = "font-family:var(--font-heading); font-size:16px; letter-spacing:.03em; padding:9px 18px; border-radius:var(--radius-sm); cursor:pointer; background:transparent; transition:all .18s ease;";
@@ -256,9 +262,11 @@
   function applyFilters() {
     chips.forEach(function (chip) { chip.setAttribute('style', chipBase + (chip.dataset.cat === active ? chipOn : chipOff)); });
     var hideReserved = hideInput && hideInput.checked;
+    var q = searchInput ? searchInput.value.trim().toLowerCase() : '';
     cards.forEach(function (card) {
       var matchesCat = active === 'Todos' || card.dataset.cat === active;
-      var visible = matchesCat && !(hideReserved && card.dataset.reserved === '1');
+      var matchesSearch = q === '' || (card.dataset.search || '').indexOf(q) !== -1;
+      var visible = matchesCat && matchesSearch && !(hideReserved && card.dataset.reserved === '1');
       card.classList.toggle('cb-hidden', !visible);
     });
   }
@@ -269,6 +277,7 @@
     chip.addEventListener('mouseleave', function () { if (chip.dataset.cat !== active) { chip.style.borderColor = 'var(--color-divider)'; chip.style.color = 'var(--color-neutral-600)'; } });
   });
   if (hideInput) hideInput.addEventListener('change', applyFilters);
+  if (searchInput) searchInput.addEventListener('input', applyFilters);
 
   // reserve buttons hover
   document.querySelectorAll('.cb-reserve').forEach(function (btn) {

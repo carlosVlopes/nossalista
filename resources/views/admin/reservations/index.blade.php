@@ -16,7 +16,6 @@
     <table class="table">
       <thead>
         <tr>
-          <th>Presente</th>
           <th>Quem reservou</th>
           <th>Telefone</th>
           <th>Quando</th>
@@ -26,7 +25,6 @@
       <tbody>
         @foreach ($reservations as $reservation)
           <tr>
-            <td style="font-weight:600;">{{ $reservation->product?->nome ?? '(produto removido)' }}</td>
             <td>{{ $reservation->nome }}</td>
             <td>{{ $reservation->telefone }}</td>
             <td class="text-muted">{{ $reservation->created_at->format('d/m/Y H:i') }}</td>

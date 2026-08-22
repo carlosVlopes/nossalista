@@ -16,10 +16,15 @@
   @if ($products->isEmpty())
     <p class="text-muted">Nenhum produto ainda. Comece adicionando o primeiro.</p>
   @else
+    <div class="field" style="max-width:360px; margin:0 0 16px;">
+      <input class="input" type="search" id="products-search" placeholder="Pesquisar por nome ou categoria…" autocomplete="off">
+    </div>
+
     <p class="text-muted" style="font-size:13px; margin:0 0 12px;">
       Arraste as linhas pela alça <span aria-hidden="true">⠿</span> para definir a ordem em que os presentes aparecem no site.
       <span id="reorder-status" style="margin-left:8px; font-weight:600;"></span>
     </p>
+    <p id="products-no-results" class="text-muted" style="display:none; margin:0 0 12px;">Nenhum produto encontrado para a pesquisa.</p>
     <table class="table" id="products-table">
       <thead>
         <tr>
@@ -73,6 +78,26 @@
     </style>
 
     <script>
+    (function () {
+      var search = document.getElementById('products-search');
+      var rows = Array.prototype.slice.call(document.querySelectorAll('#products-rows tr'));
+      var noResults = document.getElementById('products-no-results');
+      if (search) {
+        search.addEventListener('input', function () {
+          var q = search.value.trim().toLowerCase();
+          var visible = 0;
+          rows.forEach(function (row) {
+            var nome = row.children[2] ? row.children[2].textContent : '';
+            var categoria = row.children[3] ? row.children[3].textContent : '';
+            var match = q === '' || (nome + ' ' + categoria).toLowerCase().indexOf(q) !== -1;
+            row.style.display = match ? '' : 'none';
+            if (match) { visible++; }
+          });
+          noResults.style.display = visible === 0 ? 'block' : 'none';
+        });
+      }
+    })();
+
     (function () {
       var tbody = document.getElementById('products-rows');
       var statusEl = document.getElementById('reorder-status');
