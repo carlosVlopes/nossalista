@@ -106,9 +106,11 @@
     @if ($products->isEmpty())
       <p class="text-muted" style="font-size:17px;">A lista está sendo preparada com carinho. Volte em breve.</p>
     @else
-    <div style="margin-bottom:18px;">
+    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; margin-bottom:18px;">
       <input id="cb-search" type="search" placeholder="Pesquisar presente…" autocomplete="off"
-        style="width:100%; max-width:420px; box-sizing:border-box; font-family:var(--font-body); font-size:16px; padding:12px 16px; border:1px solid var(--color-divider); border-radius:var(--radius-sm); background:var(--color-bg); color:var(--color-text);">
+        style="flex:1; min-width:220px; max-width:420px; box-sizing:border-box; font-family:var(--font-body); font-size:16px; padding:12px 16px; border:1px solid var(--color-divider); border-radius:var(--radius-sm); background:var(--color-bg); color:var(--color-text);">
+      <button type="button" id="cb-my-reservations"
+        style="font-family:var(--font-heading); font-size:16px; letter-spacing:.04em; padding:12px 20px; border-radius:var(--radius-sm); cursor:pointer; background:transparent; border:1px solid var(--olive); color:var(--sage-deep); white-space:nowrap;">Ver minhas reservas</button>
     </div>
 
     <div id="cb-chips" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
@@ -216,6 +218,40 @@
       <p id="cb-reserve-success-msg" style="font-family:var(--font-body); font-size:16px; line-height:1.6; color:var(--color-neutral-700); margin:0 0 24px;"></p>
       <a id="cb-success-link" href="#" target="_blank" rel="noopener" style="display:none; margin-bottom:10px; width:100%; box-sizing:border-box; font-family:var(--font-heading); font-size:16px; padding:12px 16px; border-radius:var(--radius-sm); background:transparent; border:1px solid var(--olive); color:var(--sage-deep);">Ver o produto ↗</a>
       <button type="button" id="cb-success-close" style="width:100%; font-family:var(--font-heading); font-size:16px; padding:12px 16px; border-radius:var(--radius-sm); cursor:pointer; background:var(--sage-deep); border:1px solid var(--sage-deep); color:#fff;">Fechar</button>
+    </div>
+  </div>
+</div>
+
+{{-- My reservations modal --}}
+<div class="cb-modal-backdrop" id="cb-mine-backdrop">
+  <div class="cb-modal" role="dialog" aria-modal="true" aria-labelledby="cb-mine-title">
+    <div id="cb-mine-form-panel">
+      <div style="font-family:var(--font-heading); letter-spacing:.2em; text-transform:uppercase; font-size:12px; color:var(--color-accent-700); margin-bottom:8px;">Minhas reservas</div>
+      <h3 id="cb-mine-title" style="font-family:var(--font-heading); font-weight:500; font-size:24px; margin:0 0 6px;">Ver minhas reservas</h3>
+      <p style="font-family:var(--font-body); font-size:15px; color:var(--color-neutral-600); margin:0 0 20px;">Informe o mesmo telefone que você usou para reservar.</p>
+
+      <form method="POST" id="cb-mine-form" action="{{ route('produtos.minhas-reservas') }}">
+        @csrf
+        <div class="field" style="margin-bottom:22px;">
+          <label for="cb-mine-telefone">Seu telefone (WhatsApp) *</label>
+          <input class="input" type="tel" id="cb-mine-telefone" name="telefone" inputmode="numeric" maxlength="15" placeholder="(11) 91234-5678" required>
+        </div>
+        <div id="cb-mine-error" class="cb-flash-err" style="display:none; padding:10px 14px; border-radius:var(--radius-md); font-size:14px; margin-bottom:16px;"></div>
+        <div style="display:flex; gap:10px;">
+          <button type="submit" id="cb-mine-submit" style="flex:1; font-family:var(--font-heading); font-size:16px; padding:12px 16px; border-radius:var(--radius-sm); cursor:pointer; background:var(--sage-deep); border:1px solid var(--sage-deep); color:#fff;">Ver reservas</button>
+          <button type="button" id="cb-mine-cancel" style="font-family:var(--font-heading); font-size:16px; padding:12px 16px; border-radius:var(--radius-sm); cursor:pointer; background:transparent; border:1px solid var(--color-divider); color:var(--color-neutral-700);">Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="cb-mine-results-panel" style="display:none;">
+      <div style="font-family:var(--font-heading); letter-spacing:.2em; text-transform:uppercase; font-size:12px; color:var(--color-accent-700); margin-bottom:8px;">Minhas reservas</div>
+      <h3 style="font-family:var(--font-heading); font-weight:500; font-size:24px; margin:0 0 18px;"><span id="cb-mine-count"></span></h3>
+      <div id="cb-mine-list" style="max-height:340px; overflow-y:auto; margin-bottom:22px;"></div>
+      <div style="display:flex; gap:10px;">
+        <button type="button" id="cb-mine-back" style="flex:1; font-family:var(--font-heading); font-size:16px; padding:12px 16px; border-radius:var(--radius-sm); cursor:pointer; background:transparent; border:1px solid var(--olive); color:var(--sage-deep);">Consultar outro</button>
+        <button type="button" id="cb-mine-close" style="flex:1; font-family:var(--font-heading); font-size:16px; padding:12px 16px; border-radius:var(--radius-sm); cursor:pointer; background:var(--sage-deep); border:1px solid var(--sage-deep); color:#fff;">Fechar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -419,6 +455,134 @@
   document.getElementById('cb-success-close').addEventListener('click', closeModal);
   backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closeModal(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+  // my reservations modal
+  var mineBackdrop = document.getElementById('cb-mine-backdrop');
+  var mineBtn = document.getElementById('cb-my-reservations');
+  var mineForm = document.getElementById('cb-mine-form');
+  var minePhone = document.getElementById('cb-mine-telefone');
+  var mineFormPanel = document.getElementById('cb-mine-form-panel');
+  var mineResultsPanel = document.getElementById('cb-mine-results-panel');
+  var mineList = document.getElementById('cb-mine-list');
+  var mineCount = document.getElementById('cb-mine-count');
+  var mineError = document.getElementById('cb-mine-error');
+  var mineSubmit = document.getElementById('cb-mine-submit');
+  var mineCancel = document.getElementById('cb-mine-cancel');
+  var mineBack = document.getElementById('cb-mine-back');
+  var mineClose = document.getElementById('cb-mine-close');
+  var MINE_SUBMIT_LABEL = 'Ver reservas';
+
+  if (minePhone) {
+    minePhone.addEventListener('input', function () { minePhone.value = maskPhone(minePhone.value); });
+  }
+
+  function elNode(tag, css, text) {
+    var n = document.createElement(tag);
+    if (css) { n.style.cssText = css; }
+    if (text != null) { n.textContent = text; }
+    return n;
+  }
+
+  function openMine() {
+    mineFormPanel.style.display = '';
+    mineResultsPanel.style.display = 'none';
+    mineError.style.display = 'none';
+    mineSubmit.disabled = false;
+    mineSubmit.innerHTML = MINE_SUBMIT_LABEL;
+    mineBackdrop.classList.add('open');
+    setTimeout(function () { minePhone.focus(); }, 50);
+  }
+  function closeMine() { mineBackdrop.classList.remove('open'); }
+
+  function renderMine(data) {
+    mineList.innerHTML = '';
+    if (!data.count) {
+      mineCount.textContent = 'Nenhuma reserva encontrada';
+      mineList.appendChild(elNode('p', 'font-family:var(--font-body); font-size:15px; color:var(--color-neutral-600); margin:0;', 'Não encontramos reservas com esse telefone. Confira o número e tente novamente.'));
+    } else {
+      mineCount.textContent = data.count === 1 ? 'Você reservou 1 presente' : ('Você reservou ' + data.count + ' presentes');
+      data.reservations.forEach(function (item) {
+        var row = elNode('div', 'display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--color-divider);');
+        var thumb;
+        if (item.imagem) {
+          thumb = elNode('img', 'width:52px; height:52px; object-fit:cover; border-radius:var(--radius-sm); border:1px solid var(--color-divider); flex-shrink:0;');
+          thumb.src = item.imagem;
+          thumb.alt = '';
+        } else {
+          thumb = elNode('div', 'width:52px; height:52px; border-radius:var(--radius-sm); border:1px solid var(--color-divider); flex-shrink:0;');
+        }
+        var info = elNode('div', 'flex:1; min-width:0;');
+        info.appendChild(elNode('div', 'font-family:var(--font-heading); letter-spacing:.14em; text-transform:uppercase; font-size:11px; color:var(--sage-deep);', item.categoria || ''));
+        info.appendChild(elNode('div', 'font-family:var(--font-heading); font-size:17px; line-height:1.2;', item.nome));
+        if (item.link) {
+          var a = elNode('a', 'font-family:var(--font-heading); font-size:13px;', 'Ver produto ↗');
+          a.href = item.link;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          info.appendChild(a);
+        }
+        row.appendChild(thumb);
+        row.appendChild(info);
+        mineList.appendChild(row);
+      });
+    }
+    mineFormPanel.style.display = 'none';
+    mineResultsPanel.style.display = 'block';
+  }
+
+  if (mineForm) {
+    mineForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      mineError.style.display = 'none';
+      mineSubmit.disabled = true;
+      mineSubmit.innerHTML = '<span class="cb-spinner"></span>Buscando…';
+
+      fetch(mineForm.action, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(mineForm),
+      }).then(function (res) {
+        return res.json().then(function (data) { return { status: res.status, data: data }; });
+      }).then(function (r) {
+        mineSubmit.disabled = false;
+        mineSubmit.innerHTML = MINE_SUBMIT_LABEL;
+        if (r.status >= 200 && r.status < 300) {
+          renderMine(r.data);
+        } else if (r.status === 422) {
+          var msg = 'Verifique o telefone e tente de novo.';
+          if (r.data.errors) {
+            var keys = Object.keys(r.data.errors);
+            if (keys.length && r.data.errors[keys[0]][0]) { msg = r.data.errors[keys[0]][0]; }
+          }
+          mineError.textContent = msg;
+          mineError.style.display = 'block';
+        } else {
+          mineError.textContent = 'Algo deu errado. Tente novamente.';
+          mineError.style.display = 'block';
+        }
+      }).catch(function () {
+        mineSubmit.disabled = false;
+        mineSubmit.innerHTML = MINE_SUBMIT_LABEL;
+        mineError.textContent = 'Sem conexão. Verifique sua internet e tente novamente.';
+        mineError.style.display = 'block';
+      });
+    });
+  }
+
+  if (mineBtn) { mineBtn.addEventListener('click', openMine); }
+  if (mineCancel) { mineCancel.addEventListener('click', closeMine); }
+  if (mineClose) { mineClose.addEventListener('click', closeMine); }
+  if (mineBack) {
+    mineBack.addEventListener('click', function () {
+      mineResultsPanel.style.display = 'none';
+      mineFormPanel.style.display = '';
+      setTimeout(function () { minePhone.focus(); }, 50);
+    });
+  }
+  if (mineBackdrop) {
+    mineBackdrop.addEventListener('click', function (e) { if (e.target === mineBackdrop) { closeMine(); } });
+  }
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeMine(); } });
 
   applyFilters();
 })();

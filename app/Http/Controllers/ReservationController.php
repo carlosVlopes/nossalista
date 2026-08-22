@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ProductStatus;
+use App\Http\Requests\LookupReservationsRequest;
 use App\Http\Requests\StoreReservationRequest;
 use App\Models\Product;
+use App\Models\Reservation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -44,5 +46,33 @@ class ReservationController extends Controller
         }
 
         return back()->with('status', $message);
+    }
+
+    /**
+     * List the reservations made with a given phone number (digits-only match).
+     */
+    public function mine(LookupReservationsRequest $request): JsonResponse
+    {
+        $digits = preg_replace('/\D/', '', $request->validated('telefone'));
+
+        $reservations = Reservation::query()
+            ->with('product')
+            ->latest()
+            ->get()
+            ->filter(fn (Reservation $reservation): bool => preg_replace('/\D/', '', $reservation->telefone) === $digits)
+            ->filter(fn (Reservation $reservation): bool => $reservation->product !== null)
+            ->values();
+
+        $items = $reservations->map(fn (Reservation $reservation): array => [
+            'nome' => $reservation->product->nome,
+            'categoria' => $reservation->product->categoria,
+            'imagem' => $reservation->product->imagemUrl(),
+            'link' => $reservation->product->link,
+        ]);
+
+        return response()->json([
+            'count' => $items->count(),
+            'reservations' => $items,
+        ]);
     }
 }

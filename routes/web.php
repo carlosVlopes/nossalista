@@ -20,6 +20,9 @@ Route::get('/', function () {
 Route::post('/produtos/{product}/reservar', [ReservationController::class, 'store'])
     ->name('produtos.reservar');
 
+Route::post('/minhas-reservas', [ReservationController::class, 'mine'])
+    ->name('produtos.minhas-reservas');
+
 /*
 |--------------------------------------------------------------------------
 | Admin
